@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_vlc_player'
-  s.version          = '0.0.3'
+  s.version          = '1.0.0'
   s.summary          = 'A new Flutter project.'
   s.description      = <<-DESC
 A new Flutter project.
@@ -17,8 +17,8 @@ A new Flutter project.
   s.dependency 'Flutter'
 
   s.dependency 'MobileVLCKit', '~> 3.3.10'
+  s.pod_target_xcconfig = { 'SWIFT_INCLUDE_PATHS' => '$(PODS_TARGET_SRCROOT)/Classes'}
   s.static_framework = true
 
   s.ios.deployment_target = '9.0'
 end
-

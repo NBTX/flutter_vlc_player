@@ -84,10 +84,15 @@ class _VlcPlayerState extends State<VlcPlayer>
   }
 
   Widget _createPlatformView() {
+ 
+
     if (Platform.isIOS) {
       return UiKitView(
           viewType: "flutter_video_plugin/getVideoView",
-          onPlatformViewCreated: _onPlatformViewCreated);
+          onPlatformViewCreated: _onPlatformViewCreated,
+          creationParams: _CreationParams.fromWidget(0, 0).toMap(),
+          creationParamsCodec: StandardMessageCodec());
+          
     } else if (Platform.isAndroid) {
       return AndroidView(
           viewType: "flutter_video_plugin/getVideoView",
@@ -134,6 +139,28 @@ class _VlcPlayerState extends State<VlcPlayer>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+}
+
+
+class _CreationParams {
+  _CreationParams({this.width, this.height});
+
+  static _CreationParams fromWidget(double width, double height) {
+    return _CreationParams(
+      width: width,
+      height: height,
+    );
+  }
+
+  final double width;
+  final double height;
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'width': width,
+      'height': height,
+    };
   }
 }
 
@@ -210,13 +237,10 @@ class VlcPlayerController {
   double _playbackSpeed;
   double get playbackSpeed => _playbackSpeed;
 
-  VlcPlayerController(
-      {
-
-      /// This is a callback that will be executed once the platform view has been initialized.
-      /// If you want the media to play as soon as the platform view has initialized, you could just call
-      /// [VlcPlayerController.play] in this callback. (see the example)
-      VoidCallback onInit}) {
+  /// This is a callback that will be executed once the platform view has been initialized.
+  /// If you want the media to play as soon as the platform view has initialized, you could just call
+  /// [VlcPlayerController.play] in this callback. (see the example)
+  VlcPlayerController({VoidCallback onInit}) {
     _onInit = onInit;
     _eventHandlers = new List();
   }

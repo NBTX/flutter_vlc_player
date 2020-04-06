@@ -1,0 +1,4 @@
+module MobileVLCKit {
+    header "../../../example/ios/Pods/MobileVLCKit/MobileVLCKit.framework/Headers/MobileVLCKit.h"
+    export *
+}
