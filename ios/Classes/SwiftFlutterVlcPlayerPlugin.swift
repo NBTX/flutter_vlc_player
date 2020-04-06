@@ -27,7 +27,7 @@ public class SwiftFlutterVlcPlayerPlugin: NSObject, FlutterPlugin {
 public class VLCView: NSObject, FlutterPlatformView {
     
     
-   
+    
     
     @IBOutlet var hostedView: UIView!
     var vlcMediaPlayer: VLCMediaPlayer?
@@ -37,7 +37,7 @@ public class VLCView: NSObject, FlutterPlatformView {
     var player: VLCMediaPlayer
     var eventChannelHandler: VLCPlayerEventStreamHandler
     var aspectSet = false
- 
+    
     
     
     public init(withFrame frame: CGRect, withRegistrar registrar: FlutterPluginRegistrar, withId id: Int64){
@@ -48,115 +48,107 @@ public class VLCView: NSObject, FlutterPlatformView {
         self.eventChannel = FlutterEventChannel(name: "flutter_video_plugin/getVideoEvents_\(id)", binaryMessenger: registrar.messenger())
         self.eventChannelHandler = VLCPlayerEventStreamHandler()
         
-    
+        
     }
     
     public func view() -> UIView {
         channel.setMethodCallHandler({
             [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
-        
-            var arguments = call.arguments as! Dictionary<String, Any>
-            switch(call.method){
-            case "initialize":
-                
-                
-                let url = arguments["url"] as? String
-                
-                let media = VLCMedia(url: URL(string: url!)!)
-                self?.player.media = media
-                self?.player.position = 0.5
-                self?.player.drawable = self?.hostedView
-                self?.player.delegate = self?.eventChannelHandler
-                
-                result(nil)
-                return
-            case "setPlaybackState":
-                let playbackState = arguments["playbackState"] as? String
-                
-                if (playbackState == "play") {
-                    self?.player.play()
-                } else if (playbackState == "pause") {
-                    self?.player.pause()
-                } else if (playbackState == "stop") {
-                    self?.player.stop()
-                }
-                
-                result(nil)
-                return
-            case "dispose":
-                self?.player.stop()
-                return
-            case "changeURL":
-                if (self?.player == nil )
-                {
-                    result(FlutterError(code: "VLC_NOT_INITIALIZED", message: "The player has not yet been initialized.", details: nil))
+            
+            
+            if let arguments :Dictionary<String, Any> = call.arguments as? Dictionary<String,Any>
+            {
+                switch(call.method){
+                case "initialize":
                     
-                }
-                self?.player.stop()
-                let url = arguments["url"] as? String
-                let media = VLCMedia(url: URL(string: url!)!)
-                self?.player.media = media
-                result(nil)
-                return
-                
-            case "getSnapshot":
-                let drawable:UIView = self?.player.drawable as! UIView
-                let size = drawable.frame.size
-                
-                UIGraphicsBeginImageContextWithOptions(size , _: false, _: 0.0)
-                
-                let rec = drawable.frame
-                drawable.drawHierarchy(in: rec , afterScreenUpdates: false)
-                
-                let image = UIGraphicsGetImageFromCurrentImageContext()
-                UIGraphicsEndImageContext()
-                
-                let byteArray = (image ?? UIImage()).pngData()
-                
-                result([
-                    "snapshot": byteArray
-                ])
-                return
-                
-            case "setPlaybackState":
-                let playbackState = arguments["playbackState"] as? String
-                
-                if (playbackState == "play") {
-                    self?.player.play()
-                } else if (playbackState == "pause") {
-                    self?.player.pause()
-                } else if (playbackState == "stop") {
+                    
+                    let url = arguments["url"] as? String
+                    
+                    let media = VLCMedia(url: URL(string: url!)!)
+                    self?.player.media = media
+                    self?.player.position = 0.5
+                    self?.player.drawable = self?.hostedView
+                    self?.player.delegate = self?.eventChannelHandler
+                    
+                    result(nil)
+                    return
+                case "setPlaybackState":
+                    let playbackState = arguments["playbackState"] as? String
+                    
+                    if (playbackState == "play") {
+                        self?.player.play()
+                    } else if (playbackState == "pause") {
+                        self?.player.pause()
+                    } else if (playbackState == "stop") {
+                        self?.player.stop()
+                    }
+                    
+                    result(nil)
+                    return
+                case "dispose":
                     self?.player.stop()
+                    return
+                case "changeURL":
+                    if (self?.player == nil )
+                    {
+                        result(FlutterError(code: "VLC_NOT_INITIALIZED", message: "The player has not yet been initialized.", details: nil))
+                        
+                    }
+                    self?.player.stop()
+                    let url = arguments["url"] as? String
+                    let media = VLCMedia(url: URL(string: url!)!)
+                    self?.player.media = media
+                    result(nil)
+                    return
+                    
+                case "getSnapshot":
+                    let drawable:UIView = self?.player.drawable as! UIView
+                    let size = drawable.frame.size
+                    
+                    UIGraphicsBeginImageContextWithOptions(size , _: false, _: 0.0)
+                    
+                    let rec = drawable.frame
+                    drawable.drawHierarchy(in: rec , afterScreenUpdates: false)
+                    
+                    let image = UIGraphicsGetImageFromCurrentImageContext()
+                    UIGraphicsEndImageContext()
+                    
+                    let byteArray = (image ?? UIImage()).pngData()
+                    
+                    result([
+                        "snapshot": byteArray
+                    ])
+                    return
+                    
+                case "setPlaybackSpeed":
+                    
+                    let playbackSpeed = arguments["speed"] as? NSNumber
+                    let rate = playbackSpeed?.floatValue ?? 0.0
+                    self?.player.rate = rate
+                    result(nil)
+                    return
+                    
+                case "setTime":
+                    
+                    let time = VLCTime(number: arguments["time"] as? NSNumber)
+                    self?.player.time = time
+                    result(nil)
+                    return
+                    
+                default:
+                    result(FlutterMethodNotImplemented)
+                    return
                 }
-                result(nil)
-                return
-                
-            case "setPlaybackSpeed":
-                
-                let playbackSpeed = arguments["speed"] as? NSNumber
-                let rate = playbackSpeed?.floatValue ?? 0.0
-                self?.player.rate = rate
-                result(nil)
-                return
-                
-            case "setTime":
-                
-                let time = VLCTime(number: arguments["time"] as? NSNumber)
-                self?.player.time = time
-                result(nil)
-                return
-                
-            default:
-                result(FlutterMethodNotImplemented)
-                return
             }
+            
         })
         
-        //eventChannel.setStreamHandler(eventChannelHandler)
+        eventChannel.setStreamHandler(eventChannelHandler)
         return hostedView
+        
     }
     
- 
+    
     
 }
 
@@ -195,7 +187,7 @@ class VLCPlayerEventStreamHandler:NSObject, FlutterStreamHandler, VLCMediaPlayer
                 height = track["height"] as! Int
                 width = track["width"] as! Int
                 
-                if height != nil && width != nil  {
+                if height != 0 && width != 0  {
                     ratio = Float(width / height)
                 }
                 
@@ -251,20 +243,20 @@ class VLCPlayerEventStreamHandler:NSObject, FlutterStreamHandler, VLCMediaPlayer
         
     }
     
-    @objc func mediaPlayerTimeChanged(_ aNotification: Notification?) {
-
-          let player = aNotification?.object as? VLCMediaPlayer
-
-          if let value = player?.time.value {
-              eventSink?([
-              "name": "timeChanged",
-              "value": value,
-              "speed": NSNumber(value: player?.rate ?? 1.0)
-              ])
-          }
-
-          return
-      }
+    func mediaPlayerTimeChanged(_ aNotification: Notification!) {
+        
+        let player = aNotification?.object as? VLCMediaPlayer
+        
+        if let value = player?.time.value {
+            eventSink?([
+                "name": "timeChanged",
+                "value": value,
+                "speed": NSNumber(value: player?.rate ?? 1.0)
+            ])
+        }
+        
+        return
+    }
 }
 
 

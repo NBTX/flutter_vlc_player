@@ -96,7 +96,7 @@ class MyAppScaffoldState extends State<MyAppScaffold> {
             FlatButton(
               child: Text("Change URL"),
               onPressed: () => _videoViewController.setStreamUrl(
-                  "http://distribution.bbb3d.renderfarming.net/video/mp4/bbb_sunflower_2160p_60fps_normal.mp4"),
+                  "http://wmccpinetop.axiscam.net/mjpg/video.mjpg"),
             ),
             FlatButton(
                 child: Text("+speed"),
